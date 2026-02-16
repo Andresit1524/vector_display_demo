@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://b1bj5n3u4uut6"]
+
+[ext_resource type="Script" uid="uid://s2a8wu5b2mfs" path="res://assets/demo/charge.gd" id="1_mbt4m"]
+[ext_resource type="Texture2D" uid="uid://bjevco4n6tudk" path="res://assets/demo/particle.svg" id="2_4e8e1"]
+[ext_resource type="Script" uid="uid://c5vbvu17d8nr6" path="res://addons/vector_display_2d/vector_display_2d.gd" id="3_ey7af"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_mbt4m"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_mbt4m"]
+
+[node name="Charge" type="CharacterBody2D" unique_id=530155563 groups=["charges"]]
+script = ExtResource("1_mbt4m")
+show_value = false
+
+[node name="Sprite" type="Sprite2D" parent="." unique_id=2132766554]
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("2_4e8e1")
+
+[node name="CollisionShape" type="CollisionShape2D" parent="." unique_id=1598688413]
+shape = SubResource("CircleShape2D_mbt4m")
+
+[node name="Value" type="Label" parent="." unique_id=25515550]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -10.0
+offset_top = -33.0
+offset_right = 10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "0"
+label_settings = SubResource("LabelSettings_mbt4m")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VectorDisplay2D" type="Node2D" parent="." unique_id=2108148098 node_paths=PackedStringArray("target_node")]
+script = ExtResource("3_ey7af")
+target_node = NodePath("..")
+target_property = "force"
+clamp_vector = true
+max_length = 1000.0
+main_color = Color(1, 1, 1, 1)

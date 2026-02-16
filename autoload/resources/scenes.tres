@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="Scenes" format=3 uid="uid://bn7v8txng2pda"]
+
+[ext_resource type="Script" uid="uid://cxg35c42opm5k" path="res://autoload/resources/scripts/scenes.gd" id="4_ydkrs"]
+
+[resource]
+script = ExtResource("4_ydkrs")
+metadata/_custom_type_script = "uid://cxg35c42opm5k"

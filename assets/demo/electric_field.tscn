@@ -1,0 +1,121 @@
+[gd_scene format=3 uid="uid://4u7isidw4mxi"]
+
+[ext_resource type="Script" uid="uid://ka1dakkachpe" path="res://assets/demo/electric_field.gd" id="1_xy4kv"]
+[ext_resource type="Theme" uid="uid://c7hxjq3eputar" path="res://assets/ui/themes/main_theme.tres" id="2_al57q"]
+[ext_resource type="Texture2D" uid="uid://dnave7q17l0ck" path="res://assets/ui/components/arrow.svg" id="3_x4xdr"]
+[ext_resource type="Script" uid="uid://bqd7ewv6x4b0n" path="res://assets/demo/charges.gd" id="4_rolkm"]
+[ext_resource type="PackedScene" uid="uid://b1bj5n3u4uut6" path="res://assets/demo/charge.tscn" id="5_p5ksj"]
+[ext_resource type="Script" uid="uid://b7sl3g8v82td4" path="res://assets/demo/field.gd" id="6_p7dna"]
+
+[node name="ElectricFields" type="Node2D" unique_id=602779563]
+script = ExtResource("1_xy4kv")
+
+[node name="BackgroundLayer" type="CanvasLayer" parent="." unique_id=2129010874]
+layer = -1
+
+[node name="Background" type="ColorRect" parent="BackgroundLayer" unique_id=1116855800]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+metadata/_edit_lock_ = true
+
+[node name="UILayer" type="CanvasLayer" parent="." unique_id=789893005]
+
+[node name="UI" type="Control" parent="UILayer" unique_id=1242297409]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_al57q")
+metadata/_edit_lock_ = true
+
+[node name="SettingsPanel" type="PanelContainer" parent="UILayer/UI" unique_id=998840611]
+layout_mode = 1
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 207.0
+offset_bottom = 242.0
+
+[node name="Margin" type="MarginContainer" parent="UILayer/UI/SettingsPanel" unique_id=1898148242]
+layout_mode = 2
+
+[node name="Content" type="VBoxContainer" parent="UILayer/UI/SettingsPanel/Margin" unique_id=1250940678]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ExitButton" type="Button" parent="UILayer/UI/SettingsPanel/Margin/Content" unique_id=1710243313]
+layout_mode = 2
+text = "Salir"
+icon = ExtResource("3_x4xdr")
+flat = true
+expand_icon = true
+
+[node name="FPSLabel" type="Label" parent="UILayer/UI/SettingsPanel/Margin/Content" unique_id=786522118]
+layout_mode = 2
+text = "FPS: 0"
+
+[node name="ShowOrHideButtons" type="VBoxContainer" parent="UILayer/UI/SettingsPanel/Margin/Content" unique_id=2038455719]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="ShowFieldButton" type="CheckButton" parent="UILayer/UI/SettingsPanel/Margin/Content/ShowOrHideButtons" unique_id=776011356]
+layout_mode = 2
+button_pressed = true
+text = "Mostrar campo"
+flat = true
+autowrap_mode = 2
+
+[node name="ShowValuesButton" type="CheckButton" parent="UILayer/UI/SettingsPanel/Margin/Content/ShowOrHideButtons" unique_id=104926161]
+layout_mode = 2
+text = "Mostrar valores"
+flat = true
+autowrap_mode = 2
+
+[node name="ShowForcesButton" type="CheckButton" parent="UILayer/UI/SettingsPanel/Margin/Content/ShowOrHideButtons" unique_id=1117969839]
+layout_mode = 2
+button_pressed = true
+text = "Mostrar fuerzas"
+flat = true
+autowrap_mode = 2
+
+[node name="CheckButton" type="CheckButton" parent="UILayer/UI/SettingsPanel/Margin/Content/ShowOrHideButtons" unique_id=971924282]
+layout_mode = 2
+text = "Mostrar componentes de las fuerzas"
+flat = true
+autowrap_mode = 2
+
+[node name="Charges" type="Node" parent="." unique_id=995596893]
+script = ExtResource("4_rolkm")
+
+[node name="Charge" parent="Charges" unique_id=1573274567 instance=ExtResource("5_p5ksj")]
+position = Vector2(742, 527)
+unmovable = true
+
+[node name="Charge2" parent="Charges" unique_id=530155563 instance=ExtResource("5_p5ksj")]
+position = Vector2(568, 219)
+unmovable = true
+
+[node name="Charge3" parent="Charges" unique_id=1409962832 instance=ExtResource("5_p5ksj")]
+position = Vector2(976, 329)
+charge_sign = 1
+unmovable = true
+
+[node name="Charge4" parent="Charges" unique_id=854677072 instance=ExtResource("5_p5ksj")]
+position = Vector2(336, 641)
+charge_sign = 1
+unmovable = true
+
+[node name="Field" type="Node" parent="." unique_id=366315143]
+script = ExtResource("6_p7dna")
+
+[connection signal="pressed" from="UILayer/UI/SettingsPanel/Margin/Content/ExitButton" to="." method="_on_exit_button_pressed"]
+[connection signal="toggled" from="UILayer/UI/SettingsPanel/Margin/Content/ShowOrHideButtons/ShowFieldButton" to="Field" method="toggle_field"]
+[connection signal="toggled" from="UILayer/UI/SettingsPanel/Margin/Content/ShowOrHideButtons/ShowValuesButton" to="Charges" method="toggle_show_charges_values"]
+[connection signal="toggled" from="UILayer/UI/SettingsPanel/Margin/Content/ShowOrHideButtons/ShowForcesButton" to="Charges" method="toggle_show_forces"]
+[connection signal="toggled" from="UILayer/UI/SettingsPanel/Margin/Content/ShowOrHideButtons/CheckButton" to="Charges" method="toggle_show_charges_axes"]

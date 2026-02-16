@@ -1,0 +1,70 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Vector Display Demo"
+config/version="0.1"
+config/tags=PackedStringArray("práctica")
+run/main_scene="uid://4u7isidw4mxi"
+config/features=PackedStringArray("4.6", "Forward Plus")
+boot_splash/bg_color=Color(0.05882353, 0.4627451, 0.43137255, 1)
+config/icon="res://icon.svg"
+
+[autoload]
+
+Constants="*uid://dyx3esh8f3sip"
+Algorithms="*uid://bcdskps5b7khb"
+SceneManager="*uid://crh18u5ggkgbb"
+
+[display]
+
+window/size/viewport_width=1440
+window/size/viewport_height=810
+
+[dotnet]
+
+project/assembly_name="Vector Display Demo"
+
+[editor]
+
+movie_writer/video_quality=1.0
+movie_writer/ogv/audio_quality=1.0
+movie_writer/ogv/encoding_speed=1
+movie_writer/movie_file="res://.movie/demo.ogv"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/vector_display_2d/plugin.cfg")
+
+[file_customization]
+
+folder_colors={
+"res://addons/": "teal",
+"res://assets/": "yellow",
+"res://autoload/": "blue",
+"res://fonts/": "gray"
+}
+
+[input]
+
+back={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194305,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
+
+[rendering]
+
+rendering_device/driver.windows="d3d12"
