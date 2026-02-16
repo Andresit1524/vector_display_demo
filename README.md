@@ -1,4 +1,4 @@
-# FEM Simulator
-This is a simulator for FEM (*Fundamentos de electricidad y magnetismo* on spanish) phenomena, like electric fields, charges, etc.
+# Vector Display 2D - Demo
+This is a project for demostrations related to [Vector Display 2D](https://github.com/Andresit1524/vector_display_2d), a Godor addon made by me.
 
-This is under development.
+![demo](./captures/capture.png)
