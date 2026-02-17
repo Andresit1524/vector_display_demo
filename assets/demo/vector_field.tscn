@@ -1,14 +1,14 @@
 [gd_scene format=3 uid="uid://4u7isidw4mxi"]
 
-[ext_resource type="Script" uid="uid://ka1dakkachpe" path="res://assets/demo/electric_field.gd" id="1_xy4kv"]
-[ext_resource type="Theme" uid="uid://c7hxjq3eputar" path="res://assets/ui/themes/main_theme.tres" id="2_al57q"]
-[ext_resource type="Texture2D" uid="uid://dnave7q17l0ck" path="res://assets/ui/components/arrow.svg" id="3_x4xdr"]
-[ext_resource type="Script" uid="uid://bqd7ewv6x4b0n" path="res://assets/demo/charges.gd" id="4_rolkm"]
-[ext_resource type="PackedScene" uid="uid://b1bj5n3u4uut6" path="res://assets/demo/charge.tscn" id="5_p5ksj"]
-[ext_resource type="Script" uid="uid://b7sl3g8v82td4" path="res://assets/demo/field.gd" id="6_p7dna"]
+[ext_resource type="Script" uid="uid://ka1dakkachpe" path="res://assets/demo/vector_field.gd" id="1_02hpr"]
+[ext_resource type="Theme" uid="uid://c7hxjq3eputar" path="res://assets/ui/themes/main_theme.tres" id="2_hm84h"]
+[ext_resource type="Texture2D" uid="uid://dnave7q17l0ck" path="res://assets/ui/components/arrow.svg" id="3_hv0km"]
+[ext_resource type="Script" uid="uid://bqd7ewv6x4b0n" path="res://assets/demo/charges.gd" id="4_4dbvl"]
+[ext_resource type="PackedScene" uid="uid://b1bj5n3u4uut6" path="res://assets/demo/charge.tscn" id="5_pshbi"]
+[ext_resource type="Script" uid="uid://b7sl3g8v82td4" path="res://assets/demo/field.gd" id="6_ulujh"]
 
 [node name="ElectricFields" type="Node2D" unique_id=602779563]
-script = ExtResource("1_xy4kv")
+script = ExtResource("1_02hpr")
 
 [node name="BackgroundLayer" type="CanvasLayer" parent="." unique_id=2129010874]
 layer = -1
@@ -32,7 +32,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = ExtResource("2_al57q")
+theme = ExtResource("2_hm84h")
 metadata/_edit_lock_ = true
 
 [node name="SettingsPanel" type="PanelContainer" parent="UILayer/UI" unique_id=998840611]
@@ -52,7 +52,7 @@ theme_override_constants/separation = 8
 [node name="ExitButton" type="Button" parent="UILayer/UI/SettingsPanel/Margin/Content" unique_id=1710243313]
 layout_mode = 2
 text = "Salir"
-icon = ExtResource("3_x4xdr")
+icon = ExtResource("3_hv0km")
 flat = true
 expand_icon = true
 
@@ -91,28 +91,32 @@ flat = true
 autowrap_mode = 2
 
 [node name="Charges" type="Node" parent="." unique_id=995596893]
-script = ExtResource("4_rolkm")
+script = ExtResource("4_4dbvl")
 
-[node name="Charge" parent="Charges" unique_id=1573274567 instance=ExtResource("5_p5ksj")]
-position = Vector2(742, 527)
+[node name="Charge" parent="Charges" unique_id=1573274567 instance=ExtResource("5_pshbi")]
+position = Vector2(742, 609)
 unmovable = true
+show_value = true
 
-[node name="Charge2" parent="Charges" unique_id=530155563 instance=ExtResource("5_p5ksj")]
+[node name="Charge2" parent="Charges" unique_id=530155563 instance=ExtResource("5_pshbi")]
 position = Vector2(568, 219)
 unmovable = true
+show_value = true
 
-[node name="Charge3" parent="Charges" unique_id=1409962832 instance=ExtResource("5_p5ksj")]
+[node name="Charge3" parent="Charges" unique_id=1409962832 instance=ExtResource("5_pshbi")]
 position = Vector2(976, 329)
 charge_sign = 1
 unmovable = true
+show_value = true
 
-[node name="Charge4" parent="Charges" unique_id=854677072 instance=ExtResource("5_p5ksj")]
-position = Vector2(336, 641)
+[node name="Charge4" parent="Charges" unique_id=854677072 instance=ExtResource("5_pshbi")]
+position = Vector2(581, 466)
 charge_sign = 1
 unmovable = true
+show_value = true
 
 [node name="Field" type="Node" parent="." unique_id=366315143]
-script = ExtResource("6_p7dna")
+script = ExtResource("6_ulujh")
 
 [connection signal="pressed" from="UILayer/UI/SettingsPanel/Margin/Content/ExitButton" to="." method="_on_exit_button_pressed"]
 [connection signal="toggled" from="UILayer/UI/SettingsPanel/Margin/Content/ShowOrHideButtons/ShowFieldButton" to="Field" method="toggle_field"]

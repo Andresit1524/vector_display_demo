@@ -17,4 +17,4 @@ func _refresh_fps(delta: float) -> void:
 		elapsed_time = 0
 
 func _on_exit_button_pressed() -> void:
-	SceneManager.change_to_scene("simulator_selector")
+	get_tree().quit()
