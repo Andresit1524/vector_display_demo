@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://bykeot65g1g3k"]
+
+[ext_resource type="Script" uid="uid://csb0s8c7j2akp" path="res://assets/test/2d/arrow_2d.gd" id="1_f0ee7"]
+[ext_resource type="Script" uid="uid://dvwh5pfva0niy" path="res://addons/vector_display_2d/vector_display_2d.gd" id="2_5ky8r"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_84xs3"]
+
+[node name="Arrow2D" type="CharacterBody2D" unique_id=1535907562]
+script = ExtResource("1_f0ee7")
+
+[node name="VectorDisplay2D" type="Node2D" parent="." unique_id=1322898099 node_paths=PackedStringArray("target_node")]
+script = ExtResource("2_5ky8r")
+target_node = NodePath("..")
+target_property = "force"
+show_axes = true
+clamp_vector = true
+rainbow = true
+metadata/_custom_type_script = "uid://dvwh5pfva0niy"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=963539746]
+shape = SubResource("CircleShape2D_84xs3")

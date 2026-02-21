@@ -22,3 +22,6 @@ mono_crash.*.json
 
 # Python compiled cache
 __pycache__/
+
+# System ignores
+*.tmp

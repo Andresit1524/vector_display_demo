@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://dobtdn8fydonb"]
+
+[ext_resource type="Script" uid="uid://dhhxnvt1vtyed" path="res://assets/test/vector_display_3d/vector_display_3d.gd" id="2_1v0ck"]
+[ext_resource type="Script" uid="uid://nrdra8ows8o8" path="res://assets/test/vector_display_3d/camera.gd" id="2_eb443"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_hwejf"]
+size = Vector3(1, 1, 0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hwejf"]
+albedo_color = Color(0, 0.42409396, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hiwcr"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rjnhi"]
+albedo_color = Color(0, 1, 0.0735445, 1)
+
+[node name="Test3D" type="Node3D" unique_id=882860366]
+rotation_order = 1
+
+[node name="Camera" type="Camera3D" parent="." unique_id=1977636932]
+transform = Transform3D(0.67444026, -0.49666673, 0.54630816, -0.0051971683, 0.7367129, 0.67618585, -0.7383112, -0.45888624, 0.49428746, 3.1865237, 3.1195362, 3.182989)
+script = ExtResource("2_eb443")
+
+[node name="Planes" type="Node3D" parent="." unique_id=1013021994]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Planes" unique_id=1180524951]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.52249193, 0.5286059, 0)
+mesh = SubResource("BoxMesh_hwejf")
+surface_material_override/0 = SubResource("StandardMaterial3D_hwejf")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Planes" unique_id=712146487]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0.52234256, 0.5169412)
+mesh = SubResource("BoxMesh_hwejf")
+surface_material_override/0 = SubResource("StandardMaterial3D_hiwcr")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="Planes" unique_id=111194364]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0.5356142, 0, 0.53060764)
+mesh = SubResource("BoxMesh_hwejf")
+surface_material_override/0 = SubResource("StandardMaterial3D_rjnhi")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=950291097]
+transform = Transform3D(0.54201174, 0.3087578, 0.78159595, -0.8095091, 0.44155928, 0.38693723, -0.225651, -0.84243333, 0.48927262, 5.289637, 3.7966378, 3.5339174)
+
+[node name="VectorDisplay3D" type="Node3D" parent="." unique_id=1879723726 node_paths=PackedStringArray("target_node")]
+transform = Transform3D(1, -2.9802322e-08, 0, 5.9604645e-08, 1, 0, 0, 0, 1, 0, -4.7683716e-07, 2.3841858e-07)
+script = ExtResource("2_1v0ck")
+target_node = NodePath("../Camera")
+target_property = "position"
+vector_scale = 0.2
+width = 0.1

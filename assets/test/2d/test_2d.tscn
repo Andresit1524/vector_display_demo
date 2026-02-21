@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://cvs37ps8s2bg8"]
+
+[ext_resource type="PackedScene" uid="uid://bykeot65g1g3k" path="res://assets/test/2d/arrow_2d.tscn" id="1_1n7j1"]
+
+[node name="Test2D" type="Node2D" unique_id=1416292860]
+
+[node name="Arrow2D" parent="." unique_id=908242490 instance=ExtResource("1_1n7j1")]
+position = Vector2(483, 196)
+
+[node name="Arrow2D2" parent="." unique_id=1211689789 instance=ExtResource("1_1n7j1")]
+position = Vector2(236, 595)
+
+[node name="Arrow2D3" parent="." unique_id=1462674219 instance=ExtResource("1_1n7j1")]
+position = Vector2(625, 683)
+
+[node name="Arrow2D4" parent="." unique_id=1113811553 instance=ExtResource("1_1n7j1")]
+position = Vector2(980, 325)
+
+[node name="Arrow2D5" parent="." unique_id=1705497505 instance=ExtResource("1_1n7j1")]
+position = Vector2(1045, 692)
+
+[node name="Arrow2D6" parent="." unique_id=1987705141 instance=ExtResource("1_1n7j1")]
+position = Vector2(181, 194)
+
+[node name="Arrow2D7" parent="." unique_id=1490210805 instance=ExtResource("1_1n7j1")]
+position = Vector2(535, 444)
+
+[node name="Arrow2D8" parent="." unique_id=696850471 instance=ExtResource("1_1n7j1")]
+position = Vector2(795, 50)
+
+[node name="Arrow2D9" parent="." unique_id=943003844 instance=ExtResource("1_1n7j1")]
+position = Vector2(1284, 65)
+
+[node name="Arrow2D10" parent="." unique_id=532174854 instance=ExtResource("1_1n7j1")]
+position = Vector2(1343, 499)
