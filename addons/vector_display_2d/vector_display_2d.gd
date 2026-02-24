@@ -1,238 +1,93 @@
 extends Node2D
 
-const SHORTCUT: InputEventKey = preload("res://addons/vector_display_2d/display_shortcut.tres")
-const DIMMING_SPEED_CORRECTION := 10
 
-@export_group("Node")
-@export var target_node: Node: ## Node to show its vectors
-	set(value):
-		target_node = value
-		queue_redraw()
-@export var target_property: String = "velocity": ## Name of the Vector2 attribute or variable in node's script
-	set(value):
-		target_property = value
-		queue_redraw()
+## Node to show its vectors
+@export var target_node: Node
+## Name of the Vector2 attribute or variable in node's script
+@export var target_property: String = "velocity"
+## Vector display settings. Create your own using a [code]VectorDisplaySettings[/code] resource
+@export var settings: VectorDisplaySettings
 
-@export_group("Show")
-@export var show_vectors: bool = true: ## Show or hide all
-	set(value):
-		show_vectors = value
-		queue_redraw()
-@export var show_axes: bool = false: ## Shows X and Y component for the vector
-	set(value):
-		show_axes = value
-		queue_redraw()
-
-@export_group("Rendering")
-@export_range(0.05, 100, 0.05, "exp", "or_greater") var vector_scale: float = 1: ## Change vectors size. This doesn't change the actual vector values
-	set(value):
-		vector_scale = value
-		queue_redraw()
-@export_range(0.1, 10, 0.1, "exp", "or_greater") var width: float = 1: ## Line width
-	set(value):
-		width = value
-		queue_redraw()
-@export var clamp_vector: bool = false: ## Clamp the vector length to a max value defined below. This doesn't change the actual vector values
-	set(value):
-		clamp_vector = value
-		queue_redraw()
-@export var normalize: bool = false: ## Normalize vector length to max length defined below. This doesn't change the actual vector values
-	set(value):
-		normalize = value
-		queue_redraw()
-@export_range(0.1, 1000, 0.1, "exp", "or_greater") var max_length: float = 100: ## Max length for vector clamping or normalizing
-	set(value):
-		max_length = value
-		queue_redraw()
-@export var decorator: bool = true: ## Add a decoration for vectors head. Is always a triangle
-	set(value):
-		decorator = value
-		queue_redraw()
-@export_enum("Normal", "Centered") var pivot_mode: String = "Normal": ## Change the pivot point. Normal: starts from origin. Centered: scales symmetrically
-	set(value):
-		pivot_mode = value
-		queue_redraw()
-@export_enum("Same", "Normal", "Centered") var axis_pivot_mode: String = "Same": ## Keep same pivot point for axes or override them. Highly recommended to keep in "Same"
-	set(value):
-		axis_pivot_mode = value
-		queue_redraw()
-
-@export_group("Colors")
-@export var main_color: Color = Color.GREEN: ## Color for main vector
-	set(value):
-		main_color = value
-		queue_redraw()
-@export var x_axis_color: Color = Color.RED: ## Color for X component of vector
-	set(value):
-		x_axis_color = value
-		queue_redraw()
-@export var y_axis_color: Color = Color.BLUE: ## Color for Y component of vector
-	set(value):
-		y_axis_color = value
-		queue_redraw()
-@export var rainbow: bool = false: ## Change main vector color based on the its angle. Not aplies for axes
-	set(value):
-		rainbow = value
-		queue_redraw()
-
-@export_group("Color dimming")
-@export var dimming: bool = false: ## Turns the vector color to a fallback one when the vector gets short
-	set(value):
-		dimming = value
-		queue_redraw()
-@export_range(0.01, 10, 0.01, "or_greater") var dimming_speed: float = 1: ## Dimming speed for all colors
-	set(value):
-		dimming_speed = value
-		queue_redraw()
-@export var fallback_color: Color = Color.BLACK: ## Color the vectors tend to when they get short
-	set(value):
-		fallback_color = value
-		queue_redraw()
-@export var dimming_if_normalized: bool = false: ## Apply dimming even when vectors are normalized
-	set(value):
-		dimming_if_normalized = value
-		queue_redraw()
-@export_enum("Absolute", "Visual") var normalized_dimming_type: String = "Absolute": ## Apply dimming based on actual value (with scale) of vector or visual length
-	set(value):
-		normalized_dimming_type = value
-		queue_redraw()
 
 # Auxiliar variables
 var current_vector := Vector2.ZERO
 var current_raw_length := 0.0
 
+
 # Reassigns the target node or throws error when it doesn't exists
 func _ready() -> void:
-	if target_node == null:
-		push_warning("Target node not defined. Autoassigning to parent node")
-		target_node = get_parent()
+	VectorDisplayFunctions.check_targets_and_settings(self , target_node, target_property, settings)
 
-	if not target_node:
-		push_error("Parent node not found")
-		return
+	# Redraw automatically when settings change
+	settings.changed.connect(queue_redraw)
 
-	if not target_node.get(target_property) is Vector2:
-		push_error("Target property is not a Vector2 or doesn't exist")
 
-# Get the vector from given property
+# Get and process the vector from given property
 func _process(_delta) -> void:
 	if not is_instance_valid(target_node): return
 
-	var new_vector: Vector2 = target_node.get(target_property) * vector_scale
+	var new_vector: Vector2 = target_node.get(target_property) * settings.vector_scale
 	var new_raw_length := new_vector.length()
 
-	if normalize: new_vector = new_vector.normalized() * max_length
-	if clamp_vector: new_vector = new_vector.limit_length(max_length)
+	new_vector = VectorDisplayFunctions.apply_lenght_mode(new_vector, settings)
 
-	# Improves performance rendering when necesary
+	# Improves performance, rendering only when is necesary
 	if current_vector == new_vector and is_equal_approx(current_raw_length, new_raw_length): return
 
 	current_vector = new_vector
 	current_raw_length = new_raw_length
 	queue_redraw()
 
+
 # Draw the vectors
 func _draw() -> void:
-	if not show_vectors: return
+	if not settings.show_vectors: return
 
-	var colors := _get_draw_colors()
+	var colors := VectorDisplayFunctions.calculate_draw_colors(current_vector, current_raw_length, settings)
 
-	# Main vector calculos and render, according to mode
-	var current_vector_position := _get_main_vector_position()
-	draw_line(current_vector_position.begin, current_vector_position.end, colors.main, width, true)
-	_draw_decorators(current_vector_position.end, width * 3, colors.main)
+	# Main vector calculations and render, according to mode
+	var current_vector_position := VectorDisplayFunctions.get_main_vector_position(current_vector, settings)
+	draw_line(current_vector_position.begin, current_vector_position.end, colors.main, settings.width, true)
+	_draw_arrowhead(current_vector_position.begin, current_vector_position.end, colors.main)
 
-	if not show_axes: return
+	if not settings.show_axes: return
 
-	# Axes components calculus, according to mode
-	var current_axes_position := _get_axes_position()
+	# Axes calculations and render, according to mode
+	var current_axes_pos := VectorDisplayFunctions.get_axes_positions(current_vector, settings)
 
-	# Axis render
-	draw_line(current_axes_position.x_begin, current_axes_position.x_end, colors.x, width, true)
-	_draw_decorators(current_axes_position.x_end, width * 3, colors.x)
-	draw_line(current_axes_position.y_begin, current_axes_position.y_end, colors.y, width, true)
-	_draw_decorators(current_axes_position.y_end, width * 3, colors.y)
+	# Components render
+	draw_line(current_axes_pos.x_begin, current_axes_pos.x_end, colors.x, settings.width, true)
+	_draw_arrowhead(current_axes_pos.x_begin, current_axes_pos.x_end, colors.x)
+	draw_line(current_axes_pos.y_begin, current_axes_pos.y_end, colors.y, settings.width, true)
+	_draw_arrowhead(current_axes_pos.y_begin, current_axes_pos.y_end, colors.y)
 
-## Calculate colors based on current settings (Rainbow, Dimming, etc)
-func _get_draw_colors() -> Dictionary:
-	var colors := {
-		"main": main_color,
-		"x": x_axis_color,
-		"y": y_axis_color
-	}
 
-	if rainbow:
-		var angle := current_vector.angle()
-		if angle < 0: angle += TAU
+## Draws arrowhead for vector, given positions, size and color
+func _draw_arrowhead(start: Vector2, position: Vector2, color: Color) -> void:
+	if not settings.arrowhead: return
 
-		colors.main = Color.from_hsv(angle / TAU, 1.0, 1.0)
+	var director := (position - start).normalized()
+	var actual_size := settings.width * settings.arrowhead_size * 2
 
-	if dimming and (not normalize or dimming_if_normalized):
-		var length: float
-		match normalized_dimming_type:
-			"Absolute": length = current_raw_length
-			"Visual": length = current_vector.length()
+	# Adds a extra lenght for fix bad rendering or arrowhead
+	var offset := director * settings.width * settings.arrowhead_size
 
-		var dimming_value := 1.0
-		if not is_zero_approx(length):
-			dimming_value = clampf(dimming_speed * DIMMING_SPEED_CORRECTION / length, 0.0, 1.0)
+	# Hides arrowhead if vector is very small. If not, continue
+	if offset.length() > (position - start).length(): return
+	var actual_position := position + offset
 
-		colors.x = colors.x.lerp(fallback_color, dimming_value)
-		colors.y = colors.y.lerp(fallback_color, dimming_value)
-		colors.main = colors.main.lerp(fallback_color, dimming_value)
+	draw_polygon(
+		# Rotate 30 degrees to both sides
+		PackedVector2Array([
+			actual_position,
+			actual_position - director.rotated(PI / 6) * actual_size,
+			actual_position - director.rotated(-PI / 6) * actual_size
+		]),
+		PackedColorArray([color, color, color])
+	)
 
-	return colors
 
-## Calculate main vector position based on pivot mode
-func _get_main_vector_position() -> Dictionary:
-	var main_vector := {
-		"begin": Vector2.ZERO,
-		"end": Vector2.ZERO
-	}
-
-	match pivot_mode:
-		"Normal":
-			main_vector.begin = Vector2.ZERO
-			main_vector.end = current_vector
-		"Centered":
-			main_vector.begin = - current_vector / 2
-			main_vector.end = current_vector / 2
-
-	return main_vector
-
-## Calculates axes position based on pivot modes
-func _get_axes_position() -> Dictionary:
-	var axes := {
-		"x_begin": Vector2.ZERO,
-		"x_end": Vector2.ZERO,
-		"y_begin": Vector2.ZERO,
-		"y_end": Vector2.ZERO
-	}
-
-	if axis_pivot_mode == "Normal" and pivot_mode == "Centered":
-		axes.x_begin = - Vector2(current_vector.x / 2, current_vector.y / 2)
-		axes.x_end = Vector2(current_vector.x / 2, -current_vector.y / 2)
-		axes.y_begin = - Vector2(current_vector.x / 2, current_vector.y / 2)
-		axes.y_end = Vector2(-current_vector.x / 2, current_vector.y / 2)
-	elif axis_pivot_mode == "Normal" or (pivot_mode == "Normal" and axis_pivot_mode == "Same"):
-		axes.x_begin = Vector2.ZERO
-		axes.x_end = Vector2(current_vector.x, 0)
-		axes.y_begin = Vector2.ZERO
-		axes.y_end = Vector2(0, current_vector.y)
-	elif axis_pivot_mode == "Centered" or (pivot_mode == "Centered" and axis_pivot_mode == "Same"):
-		axes.x_begin = - Vector2(current_vector.x / 2, 0)
-		axes.x_end = Vector2(current_vector.x / 2, 0)
-		axes.y_begin = - Vector2(0, current_vector.y / 2)
-		axes.y_end = Vector2(0, current_vector.y / 2)
-
-	return axes
-
-## Draws decorator for vector, let given position
-func _draw_decorators(decorator_position: Vector2, size: float, color: Color) -> void:
-	if not decorator: return
-
-	# TODO: Make ts
-
-# Detects shortcut to toggle visibility
+# Detects shortcut to toggle visibility. Avoid concurrency and echo errors
 func _unhandled_key_input(event: InputEvent) -> void:
-	if event.is_pressed() and event.is_match(SHORTCUT): show_vectors = not show_vectors
+	if VectorDisplayFunctions.check_shortcut(event, settings):
+		get_viewport().set_input_as_handled()
