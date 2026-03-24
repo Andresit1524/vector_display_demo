@@ -1,7 +1,17 @@
 [gd_scene format=3 uid="uid://bykeot65g1g3k"]
 
 [ext_resource type="Script" uid="uid://csb0s8c7j2akp" path="res://assets/test/2d/arrow_2d.gd" id="1_f0ee7"]
-[ext_resource type="Script" uid="uid://dvwh5pfva0niy" path="res://addons/vector_display_2d/vector_display_2d.gd" id="2_5ky8r"]
+[ext_resource type="Script" uid="uid://r62a6sowblq0" path="res://addons/vector_display_2d/vector_display_2d.gd" id="2_5ky8r"]
+[ext_resource type="Script" uid="uid://bxk8kvbrc62x6" path="res://addons/vector_display_2d/vector_display_settings.gd" id="3_tytjr"]
+
+[sub_resource type="Resource" id="Resource_tytjr"]
+script = ExtResource("3_tytjr")
+show_axes = true
+length_mode = "Clamp"
+pivot_mode = "Centered"
+axes_pivot_mode = "Normal"
+rainbow = true
+metadata/_custom_type_script = "uid://bxk8kvbrc62x6"
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_84xs3"]
 
@@ -12,10 +22,7 @@ script = ExtResource("1_f0ee7")
 script = ExtResource("2_5ky8r")
 target_node = NodePath("..")
 target_property = "force"
-show_axes = true
-clamp_vector = true
-rainbow = true
-metadata/_custom_type_script = "uid://dvwh5pfva0niy"
+settings = SubResource("Resource_tytjr")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=963539746]
 shape = SubResource("CircleShape2D_84xs3")
