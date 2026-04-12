@@ -25,7 +25,7 @@ static func check_targets_and_settings(self_node: Node, target_node: Node, targe
 
 
 ## Process a vector to apply lenght mode
-static func apply_lenght_mode(vector, settings: VectorDisplaySettings):
+static func apply_length_mode(vector, settings: VectorDisplaySettings):
 	match settings.length_mode:
 		"Clamp": return vector.limit_length(settings.max_length)
 		"Normalize": return vector.normalized() * settings.max_length
@@ -34,7 +34,7 @@ static func apply_lenght_mode(vector, settings: VectorDisplaySettings):
 	return null
 
 
-## Auxiliar: check vector type
+## Auxiliary: check vector type
 static func _is_vector_type(vector) -> bool:
 	if vector is Vector2 or vector is Vector3: return true
 
