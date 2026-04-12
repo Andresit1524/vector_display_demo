@@ -4,7 +4,7 @@ class_name VectorDisplay2D extends Node2D
 ## Node to show its vectors
 @export var target_node: Node
 ## Name of the Vector2 attribute or variable in node's script
-@export var target_property: String = "velocity"
+@export var target_property: StringName = &"velocity"
 ## Vector display settings. Create your own using a [code]VectorDisplaySettings[/code] resource
 @export var settings: VectorDisplaySettings
 

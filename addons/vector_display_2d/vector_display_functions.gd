@@ -2,11 +2,18 @@
 class_name VectorDisplayFunctions extends RefCounted
 
 
+# Enum aliases to avoid writing VectorDisplaySettings every time
+const LenghtModes = VectorDisplaySettings.LenghtModes
+const PivotModes = VectorDisplaySettings.PivotModes
+const AxesPivotModes = VectorDisplaySettings.AxesPivotModes
+const DimmingTypes = VectorDisplaySettings.DimmingTypes
+
+
 #region Initial and auxiliary methods
 
 
 ## Check the target node, its property value and settings resource
-static func check_targets_and_settings(self_node: Node, target_node: Node, target_property: String, settings: VectorDisplaySettings):
+static func check_targets_and_settings(self_node: Node, target_node: Node, target_property: StringName, settings: VectorDisplaySettings):
 	if not settings: push_error("[VectorDisplay] Settings not defined")
 
 	if target_node == null:
@@ -26,9 +33,9 @@ static func apply_length_mode(vector, settings: VectorDisplaySettings):
 	var result = vector
 
 	match settings.length_mode:
-		"Normal": pass
-		"Clamp": result = vector.limit_length(settings.max_length)
-		"Normalize": result = vector.normalized() * settings.max_length
+		LenghtModes.NORMAL: pass
+		LenghtModes.CLAMP: result = vector.limit_length(settings.max_length)
+		LenghtModes.NORMALIZE: result = vector.normalized() * settings.max_length
 		_: push_error("[VectorDisplay] Length mode not supported: %s" % settings.length_mode)
 
 	return result * settings.vector_scale
@@ -86,8 +93,8 @@ static func calculate_draw_colors(vector, current_raw_length: float, settings: V
 	if settings.dimming:
 		var length: float
 		match settings.dimming_type:
-			"Absolute": length = current_raw_length
-			"Visual", _: length = vector.length()
+			DimmingTypes.ABSOLUTE: length = current_raw_length
+			DimmingTypes.VISUAL, _: length = vector.length()
 
 		# Value
 		var dimming_value := 1.0
@@ -133,11 +140,11 @@ static func get_main_vector_position(vector, settings: VectorDisplaySettings) ->
 	if not _is_vector_type(vector): return current_vector
 
 	match settings.pivot_mode:
-		"Normal":
+		PivotModes.NORMAL:
 			# The rest of calculations can be made directly without worring for type
 			current_vector.begin = Vector2.ZERO if vector is Vector2 else Vector3.ZERO
 			current_vector.end = vector
-		"Centered":
+		PivotModes.CENTERED:
 			current_vector.begin = - vector / 2
 			current_vector.end = vector / 2
 		_: push_error("[VectorDisplay] Pivot mode not supported: %s" % settings.pivot_mode)
@@ -156,9 +163,15 @@ static func get_axes_positions(vector, settings: VectorDisplaySettings) -> VDPos
 		axes.z_begin = Vector3.ZERO
 		axes.z_end = Vector3.ZERO
 
+	# Conditions to the next cases
+	var axis_normal := settings.axes_pivot_mode == AxesPivotModes.NORMAL
+	var axis_centered := settings.axes_pivot_mode == AxesPivotModes.CENTERED
+	var same_and_normal := settings.pivot_mode == PivotModes.NORMAL and settings.axes_pivot_mode == AxesPivotModes.SAME
+	var same_and_centered := settings.pivot_mode == PivotModes.CENTERED and settings.axes_pivot_mode == AxesPivotModes.SAME
+
 	# Special case: Centered and Normal Axis
 	# Takes the normal axes ends and then substracts half of original vector
-	if settings.axes_pivot_mode == "Normal" and settings.pivot_mode == "Centered":
+	if axis_normal and settings.pivot_mode == PivotModes.CENTERED:
 		axes.x_begin = - vector / 2
 		axes.x_end = (Vector2(vector.x, 0) if vector is Vector2 else Vector3(vector.x, 0, 0)) - vector / 2
 		axes.y_begin = - vector / 2
@@ -171,7 +184,7 @@ static func get_axes_positions(vector, settings: VectorDisplaySettings) -> VDPos
 		return axes
 
 	# Normal setting: takes the normal components
-	if settings.axes_pivot_mode == "Normal" or (settings.pivot_mode == "Normal" and settings.axes_pivot_mode == "Same"):
+	if axis_normal or same_and_normal:
 		axes.x_begin = Vector2.ZERO if vector is Vector2 else Vector3.ZERO
 		axes.x_end = Vector2(vector.x, 0) if vector is Vector2 else Vector3(vector.x, 0, 0)
 		axes.y_begin = Vector2.ZERO if vector is Vector2 else Vector3.ZERO
@@ -184,7 +197,7 @@ static func get_axes_positions(vector, settings: VectorDisplaySettings) -> VDPos
 		return axes
 
 	# Centered setting: center all axes (- axis / 2, axis / 2)
-	if settings.axes_pivot_mode == "Centered" or (settings.pivot_mode == "Centered" and settings.axes_pivot_mode == "Same"):
+	if axis_centered or same_and_centered:
 		axes.x_begin = - Vector2(vector.x / 2, 0) if vector is Vector2 else -Vector3(vector.x / 2, 0, 0)
 		axes.x_end = Vector2(vector.x / 2, 0) if vector is Vector2 else Vector3(vector.x / 2, 0, 0)
 		axes.y_begin = - Vector2(0, vector.y / 2) if vector is Vector2 else -Vector3(0, vector.y / 2, 0)

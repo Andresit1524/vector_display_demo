@@ -2,6 +2,29 @@
 class_name VectorDisplaySettings extends Resource
 
 
+enum LenghtModes {
+	NORMAL,
+	CLAMP,
+	NORMALIZE,
+}
+
+enum PivotModes {
+	NORMAL,
+	CENTERED,
+}
+
+enum AxesPivotModes {
+	SAME,
+	NORMAL,
+	CENTERED,
+}
+
+enum DimmingTypes {
+	VISUAL,
+	ABSOLUTE,
+}
+
+
 const SHORTCUT: InputEventKey = preload("res://addons/vector_display_2d/display_shortcut.tres")
 const DIMMING_INTENSITY_CORRECTION := 10.0
 
@@ -31,7 +54,7 @@ const DIMMING_INTENSITY_CORRECTION := 10.0
 		width = value
 		changed.emit()
 ## Change the displayed vector length. Both clamp and normalize doesn´t change the actual vector values
-@export_enum("Normal", "Clamp", "Normalize") var length_mode: String = "Normal":
+@export var length_mode: LenghtModes = LenghtModes.NORMAL:
 	set(value):
 		length_mode = value
 		changed.emit()
@@ -51,12 +74,12 @@ const DIMMING_INTENSITY_CORRECTION := 10.0
 		arrowhead_size = value
 		changed.emit()
 ## Change the pivot point. Normal: starts from origin. Centered: scales symmetrically
-@export_enum("Normal", "Centered") var pivot_mode: String = "Normal":
+@export var pivot_mode: PivotModes = PivotModes.NORMAL:
 	set(value):
 		pivot_mode = value
 		changed.emit()
 ## Keep same pivot point for axes or override them. Highly recommended to keep in "Same"
-@export_enum("Same", "Normal", "Centered") var axes_pivot_mode: String = "Same":
+@export var axes_pivot_mode: AxesPivotModes = AxesPivotModes.SAME:
 	set(value):
 		axes_pivot_mode = value
 		changed.emit()
@@ -108,8 +131,8 @@ const DIMMING_INTENSITY_CORRECTION := 10.0
 	set(value):
 		fallback_color = value
 		changed.emit()
-## Apply dimming based on actual value of vector (with scale) or visual length, or just choose None
-@export_enum("Visual", "Absolute") var dimming_type: String = "Visual":
+## Apply dimming based on visual length or actual value of vector (with scale)
+@export var dimming_type: DimmingTypes = DimmingTypes.VISUAL:
 	set(value):
 		dimming_type = value
 		changed.emit()
