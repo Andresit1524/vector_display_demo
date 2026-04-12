@@ -109,7 +109,7 @@ const DIMMING_INTENSITY_CORRECTION := 10.0
 		fallback_color = value
 		changed.emit()
 ## Apply dimming based on actual value of vector (with scale) or visual length, or just choose None
-@export_enum("None", "Absolute", "Visual") var normalized_dimming_type: String = "None":
+@export_enum("Visual", "Absolute") var dimming_type: String = "Visual":
 	set(value):
-		normalized_dimming_type = value
+		dimming_type = value
 		changed.emit()

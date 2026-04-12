@@ -2,11 +2,13 @@
 class_name VectorDisplayFunctions extends RefCounted
 
 
-#region Initial verifications
+#region Initial and auxiliary methods
 
 
 ## Check the target node, its property value and settings resource
 static func check_targets_and_settings(self_node: Node, target_node: Node, target_property: String, settings: VectorDisplaySettings):
+	if not settings: push_error("[VectorDisplay] Settings not defined")
+
 	if target_node == null:
 		push_warning("[VectorDisplay] Target node not defined. Autoassigning to parent node")
 		target_node = self_node.get_parent()
@@ -17,21 +19,19 @@ static func check_targets_and_settings(self_node: Node, target_node: Node, targe
 
 	if not target_node.get(target_property) is Vector2:
 		push_error("[VectorDisplay] Target property is not a Vector2 or doesn't exist")
-		return
-
-	if not settings:
-		push_error("[VectorDisplay] Settings not defined")
-		return
 
 
 ## Process a vector to apply lenght mode
 static func apply_length_mode(vector, settings: VectorDisplaySettings):
-	match settings.length_mode:
-		"Clamp": return vector.limit_length(settings.max_length)
-		"Normalize": return vector.normalized() * settings.max_length
-		"Normal": return vector
+	var result = vector
 
-	return null
+	match settings.length_mode:
+		"Normal": pass
+		"Clamp": result = vector.limit_length(settings.max_length)
+		"Normalize": result = vector.normalized() * settings.max_length
+		_: push_error("[VectorDisplay] Length mode not supported: %s" % settings.length_mode)
+
+	return result * settings.vector_scale
 
 
 ## Auxiliary: check vector type
@@ -64,6 +64,10 @@ class VDColors:
 
 ## Calculate colors based on current settings (Rainbow, Dimming, etc)
 static func calculate_draw_colors(vector, current_raw_length: float, settings: VectorDisplaySettings) -> VDColors:
+	# Check type and quit if is not vector
+	if not _is_vector_type(vector): return
+
+	# Colors initialization
 	var colors := VDColors.new(
 		settings.main_color,
 		settings.x_axis_color,
@@ -71,27 +75,27 @@ static func calculate_draw_colors(vector, current_raw_length: float, settings: V
 		settings.z_axis_color
 	)
 
-	# Check type, throws error or add new color for 3D if necessary
-	if not _is_vector_type(vector): return colors
-
-	# Color rainbow
+	# Apply color rainbow
 	if settings.rainbow:
 		var angle: float = vector.angle()
 		if angle < 0: angle += TAU
 
 		colors.main = Color.from_hsv(angle / TAU, 1.0, 1.0)
 
-	# Color dimming
-	if settings.dimming and (not settings.length_mode == "Normalize" or settings.normalized_dimming_type != "None"):
-		var length: float = vector.length()
-		match settings.normalized_dimming_type:
+	# Apply color dimming
+	if settings.dimming:
+		var length: float
+		match settings.dimming_type:
 			"Absolute": length = current_raw_length
-			"Visual": length = vector.length()
+			"Visual", _: length = vector.length()
 
+		# Value
 		var dimming_value := 1.0
-		if not is_zero_approx(length):
-			dimming_value = clampf(settings.dimming_intensity * settings.DIMMING_INTENSITY_CORRECTION / length, 0.0, 1.0)
+		if not is_zero_approx(length): dimming_value = clampf(
+			settings.dimming_intensity * settings.DIMMING_INTENSITY_CORRECTION / length, 0.0, 1.0
+		)
 
+		# Apply
 		colors.x = colors.x.lerp(settings.fallback_color, dimming_value)
 		colors.y = colors.y.lerp(settings.fallback_color, dimming_value)
 		colors.z = colors.z.lerp(settings.fallback_color, dimming_value)
@@ -110,10 +114,13 @@ static func calculate_draw_colors(vector, current_raw_length: float, settings: V
 class VDPosition:
 	var begin: Vector2
 	var end: Vector2
+
 	var x_begin: Vector2
 	var x_end: Vector2
+
 	var y_begin: Vector2
 	var y_end: Vector2
+
 	var z_begin: Vector3
 	var z_end: Vector3
 
@@ -133,6 +140,7 @@ static func get_main_vector_position(vector, settings: VectorDisplaySettings) ->
 		"Centered":
 			current_vector.begin = - vector / 2
 			current_vector.end = vector / 2
+		_: push_error("[VectorDisplay] Pivot mode not supported: %s" % settings.pivot_mode)
 
 	return current_vector
 
@@ -143,6 +151,7 @@ static func get_axes_positions(vector, settings: VectorDisplaySettings) -> VDPos
 
 	# Check type, throws error or add new axes for 3D if necessary
 	if not _is_vector_type(vector): return axes
+
 	if vector is Vector3:
 		axes.z_begin = Vector3.ZERO
 		axes.z_end = Vector3.ZERO

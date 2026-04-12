@@ -30,7 +30,7 @@ func _process(_delta) -> void:
 	if not is_instance_valid(target_node): return
 
 	# New values
-	var new_vector: Vector2 = target_node.get(target_property) * settings.vector_scale
+	var new_vector: Vector2 = target_node.get(target_property)
 	var new_raw_length := new_vector.length()
 	new_vector = VectorDisplayFunctions.apply_length_mode(new_vector, settings)
 
