@@ -2,8 +2,21 @@
 
 [ext_resource type="Script" uid="uid://ioq8rba681dy" path="res://assets/test/2d/test_2d.gd" id="1_ra3y6"]
 [ext_resource type="Resource" uid="uid://bp2qks031kmjv" path="res://assets/test/2d/preset.tres" id="2_ra3y6"]
+[ext_resource type="Script" uid="uid://67upr8vh8fok" path="res://assets/test/2d/label.gd" id="3_3dev8"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_3dev8"]
+font_size = 64
 
 [node name="Test2D" type="Node2D" unique_id=1416292860]
 script = ExtResource("1_ra3y6")
 preset = ExtResource("2_ra3y6")
 distance = 20.0
+
+[node name="Label" type="Label" parent="." unique_id=679203994]
+offset_left = 40.0
+offset_top = 37.0
+offset_right = 183.0
+offset_bottom = 125.0
+text = "FPS: "
+label_settings = SubResource("LabelSettings_3dev8")
+script = ExtResource("3_3dev8")

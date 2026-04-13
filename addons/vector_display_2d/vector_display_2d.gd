@@ -5,13 +5,18 @@ class_name VectorDisplay2D extends Node2D
 @export var target_node: Node
 ## Name of the Vector2 attribute or variable in node's script
 @export var target_property: StringName = &"velocity"
+## Optional: Name of the property that holds the origins (Vector2 or Array)
+@export var target_position_property: StringName = &""
 ## Vector display settings. Create your own using a [code]VectorDisplaySettings[/code] resource
 @export var settings: VectorDisplaySettings
 
 
 # Auxiliary variables
-var current_vector := Vector2.ZERO
-var current_raw_length := 0.0
+var _line_points := PackedVector2Array()
+var _line_colors := PackedColorArray()
+var _arrow_points := PackedVector2Array()
+var _arrow_colors := PackedColorArray()
+var _last_input_hash: int = 0
 
 
 #region Node life cycle
@@ -30,16 +35,72 @@ func _process(_delta) -> void:
 	if not is_instance_valid(target_node): return
 
 	# New values
-	var new_vector: Vector2 = target_node.get(target_property)
-	var new_raw_length := new_vector.length()
-	new_vector = VectorDisplayFunctions.apply_length_mode(new_vector, settings)
+	var raw_input = target_node.get(target_property)
+	if raw_input == null: return
 
-	# Improves performance, rendering only when is necesary
-	if current_vector == new_vector and is_equal_approx(current_raw_length, new_raw_length): return
+	# Simple hash check to avoid redundant calculations
+	var current_hash = hash(raw_input)
+	if not target_position_property.is_empty():
+		current_hash += hash(target_node.get(target_position_property))
 
-	# Update and queue redraw
-	current_vector = new_vector
-	current_raw_length = new_raw_length
+	if _last_input_hash == current_hash: return
+	_last_input_hash = current_hash
+
+	var raw_offsets = null
+	if not target_position_property.is_empty():
+		raw_offsets = target_node.get(target_position_property)
+
+	# Normalizes input to always be a list for processing
+	var input_list: Array = []
+	if raw_input is Vector2: input_list = [raw_input]
+	elif raw_input is Array or raw_input is PackedVector2Array: input_list = Array(raw_input)
+	else: return
+
+	# Normalizes offsets
+	var offset_list: Array = []
+	if raw_offsets is Vector2: offset_list = [raw_offsets]
+	elif raw_offsets is Array or raw_offsets is PackedVector2Array: offset_list = Array(raw_offsets)
+
+	# Prepare batch arrays
+	var new_line_points := PackedVector2Array()
+	var new_line_colors := PackedColorArray()
+	var new_arrow_points := PackedVector2Array()
+	var new_arrow_colors := PackedColorArray()
+
+	for i in range(input_list.size()):
+		var raw_v: Vector2 = input_list[i]
+		var offset: Vector2 = offset_list[i] if i < offset_list.size() else Vector2.ZERO
+
+		var processed_v = VectorDisplayFunctions.apply_length_mode(raw_v, settings)
+		var colors = VectorDisplayFunctions.calculate_draw_colors(processed_v, raw_v.length(), settings)
+		var pos = VectorDisplayFunctions.get_main_vector_position(processed_v, settings)
+
+		# Add main line
+		new_line_points.push_back(pos.begin + offset)
+		new_line_points.push_back(pos.end + offset)
+		new_line_colors.push_back(colors.main)
+
+		# Pre-calculate arrowhead if needed
+		if settings.arrowhead:
+			_append_arrowhead_points(new_arrow_points, new_arrow_colors, pos.begin + offset, pos.end + offset, colors.main)
+
+		# Axes
+		if settings.show_axes:
+			var axes_pos = VectorDisplayFunctions.get_axes_positions(processed_v, settings)
+			new_line_points.push_back(axes_pos.x_begin + offset)
+			new_line_points.push_back(axes_pos.x_end + offset)
+			new_line_colors.push_back(colors.x)
+			new_line_points.push_back(axes_pos.y_begin + offset)
+			new_line_points.push_back(axes_pos.y_end + offset)
+			new_line_colors.push_back(colors.y)
+			if settings.arrowhead:
+				_append_arrowhead_points(new_arrow_points, new_arrow_colors, axes_pos.x_begin + offset, axes_pos.x_end + offset, colors.x)
+				_append_arrowhead_points(new_arrow_points, new_arrow_colors, axes_pos.y_begin + offset, axes_pos.y_end + offset, colors.y)
+
+	_line_points = new_line_points
+	_line_colors = new_line_colors
+	_arrow_points = new_arrow_points
+	_arrow_colors = new_arrow_colors
 	queue_redraw()
 
 
@@ -53,50 +114,27 @@ func _process(_delta) -> void:
 func _draw() -> void:
 	if not settings.show_vectors: return
 
-	var colors := VectorDisplayFunctions.calculate_draw_colors(current_vector, current_raw_length, settings)
+	if _line_points.size() > 1:
+		draw_multiline_colors(_line_points, _line_colors, settings.width, true)
 
-	# Main vector calculations and render, according to mode
-	var current_vector_position := VectorDisplayFunctions.get_main_vector_position(current_vector, settings)
-	draw_line(current_vector_position.begin, current_vector_position.end, colors.main, settings.width, true)
-	_draw_arrowhead(current_vector_position.begin, current_vector_position.end, colors.main)
-
-	# Skip axes if needed
-	if not settings.show_axes: return
-
-	# Axes calculations and render, according to mode
-	var current_axes_pos := VectorDisplayFunctions.get_axes_positions(current_vector, settings)
-	draw_line(current_axes_pos.x_begin, current_axes_pos.x_end, colors.x, settings.width, true)
-	draw_line(current_axes_pos.y_begin, current_axes_pos.y_end, colors.y, settings.width, true)
-	_draw_arrowhead(current_axes_pos.x_begin, current_axes_pos.x_end, colors.x)
-	_draw_arrowhead(current_axes_pos.y_begin, current_axes_pos.y_end, colors.y)
+	# Draw all arrowheads in one batch if possible
+	# Note: draw_multiline for wireframe or RenderingServer for filled triangles
+	for i in range(0, _arrow_points.size(), 3):
+		draw_polygon([_arrow_points[i], _arrow_points[i + 1], _arrow_points[i + 2]], [_arrow_colors[i / 3]])
 
 
-## Draws arrowhead for vector, given positions, size and color
-func _draw_arrowhead(start: Vector2, position: Vector2, color: Color) -> void:
-	if not settings.arrowhead: return
-
-	# Unit direction of the original vector (director)
+## Internal helper to calculate arrowhead vertices and append them to batch arrays
+func _append_arrowhead_points(points: PackedVector2Array, colors: PackedColorArray, start: Vector2, position: Vector2, color: Color) -> void:
 	var director := (position - start).normalized()
-
-	# Sides length of the triangle
 	var actual_size := settings.width * settings.arrowhead_size * 2
-
-	# Adds a extra length for fix bad rendering of arrowhead
 	var offset := director * settings.width * settings.arrowhead_size
-
-	# Hides arrowhead if vector is very small. If not, continue
 	if offset.length() > (position - start).length(): return
-	var actual_position := position + offset
 
-	draw_polygon(
-		# Rotate 30 degrees to both sides
-		PackedVector2Array([
-			actual_position,
-			actual_position - director.rotated(PI / 6) * actual_size,
-			actual_position - director.rotated(-PI / 6) * actual_size
-		]),
-		PackedColorArray([color, color, color])
-	)
+	var actual_position := position + offset
+	points.push_back(actual_position)
+	points.push_back(actual_position - director.rotated(PI / 6) * actual_size)
+	points.push_back(actual_position - director.rotated(-PI / 6) * actual_size)
+	colors.push_back(color)
 
 
 #endregion

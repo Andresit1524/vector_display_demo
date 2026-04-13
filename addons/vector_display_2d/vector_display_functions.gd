@@ -24,8 +24,9 @@ static func check_targets_and_settings(self_node: Node, target_node: Node, targe
 		push_error("[VectorDisplay] Target node not found")
 		return
 
-	if not target_node.get(target_property) is Vector2:
-		push_error("[VectorDisplay] Target property is not a Vector2 or doesn't exist")
+	var val = target_node.get(target_property)
+	if not (val is Vector2 or val is Array or val is PackedVector2Array):
+		push_error("[VectorDisplay] Target property must be Vector2, Array or PackedVector2Array")
 
 
 ## Process a vector to apply lenght mode

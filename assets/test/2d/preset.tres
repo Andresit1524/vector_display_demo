@@ -1,11 +1,10 @@
 [gd_resource type="Resource" script_class="VectorDisplaySettings" format=3 uid="uid://bp2qks031kmjv"]
 
-[ext_resource type="Script" uid="uid://bxk8kvbrc62x6" path="res://addons/vector_display_2d/vector_display_settings.gd" id="1_e3d7w"]
+[ext_resource type="Script" uid="uid://c4r21cldedc1u" path="res://addons/vector_display_2d/vector_display_settings.gd" id="1_e3d7w"]
 
 [resource]
 script = ExtResource("1_e3d7w")
 vector_scale = 0.05
-length_mode = "Clamp"
 arrowhead_size = 2.0
 dimming = true
 metadata/_custom_type_script = "uid://bxk8kvbrc62x6"
